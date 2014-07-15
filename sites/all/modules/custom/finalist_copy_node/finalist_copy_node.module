@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * small module to copy specific nodes and clear old nodes so the database
+ * does not get flodded.
+ *
+ * depents on regular cron runs
+ */
+
+/*
+  function select nodes to copy
+ */
+
+
+/*
+  function insert nodes
+ */

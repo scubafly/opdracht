@@ -1,0 +1,5 @@
+name = Finalist copy node
+description = copy nodes so the database doesn't gets overflodded
+core = 7.x
+package = Features
+version = 7.x-1.0

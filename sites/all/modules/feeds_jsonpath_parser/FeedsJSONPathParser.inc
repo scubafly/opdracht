@@ -54,12 +54,10 @@ class FeedsJSONPathParser extends FeedsParser {
           // Avoid null values.
           if (isset($parsed)) {
             // Variable sunstitution can't handle arrays.
-            if (!is_array($parsed)) {
-              $variables['{' . $mappings[$source] . '}'] = $parsed;
+            if (is_array($parsed)) {
+              $parsed = implode(" ", $parsed);
             }
-            else {
-              $variables['{' . $mappings[$source] . '}'] = '';
-            }
+            $variables['{' . $mappings[$source] . '}'] = $parsed;
             $parsed_item[$source] = $parsed;
           }
         }
@@ -230,8 +228,8 @@ class FeedsJSONPathParser extends FeedsParser {
     $mappings = $this->filterMappings(feeds_importer($this->id)->processor->config['mappings']);
     $next = 0;
     if (!empty($mappings)) {
-      $last_mapping = end(array_keys($mappings));
-      $next = explode(':', $last_mapping);
+      $last_mapping = array_keys($mappings);
+      $next = explode(':', end($last_mapping));
       $next = $next[1] + 1;
     }
     return array(
