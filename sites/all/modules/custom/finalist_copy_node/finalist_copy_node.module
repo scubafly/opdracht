@@ -9,10 +9,35 @@
  */
 
 /*
-  function select nodes to copy
+ * Implements hook_cron()
+ * Controller to initiate copy
+ */
+
+/*
+ * logic component
+ * Make sure previews cron is around 1 hour ago else skip this run
+ *
+ * select node function
+ *
+ * insert new nodes as other content type
+ *
+ * delete nodes from JSON crawled feed except the most recent ones or call
+ * JOSN feed imedetly after.
+ */
+
+/*
+ * function select nodes
+ * select nodes where date is between now and now() -1 hour
+ * and the most recent ones distinct by traject
+ * returns node objects or array $nid
  */
 
 
 /*
-  function insert nodes
+ * function insert nodes
+ * (node_save())
+ */
+
+/*
+ * function delete nodes older then one hour
  */
