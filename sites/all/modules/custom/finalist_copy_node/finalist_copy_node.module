@@ -34,7 +34,7 @@ function finalist_copy_node_node_view($node, $view_mode, $langcode) {
   $one_hour_ago = (time() - 3600);
   dpm("one hour ago: " . $one_hour_ago);
 
-  if($last_cron <= $one_hour_ago) {
+  if($last_cron >= $one_hour_ago) {
     // time to run cron again
 
     // give job to controller
