@@ -18,11 +18,11 @@ function finalist_copy_node_cron() {
   // get last cron run for this else use last system cron time.
   $last_cron = variable_get('finalist_copy_node_cron', variable_get('cron_last'));
 
-  dpm("Last cron run was: " . $last_cron);
+  // dpm("Last cron run was: " . $last_cron);
 
   // one hour ago: ( minus 3600 seconds (60*60))
   $one_hour_ago = (time() - 3600);
-  dpm("one hour ago: " . $one_hour_ago);
+  // dpm("one hour ago: " . $one_hour_ago);
 
   if($last_cron >= $one_hour_ago OR true == true) { // added true for dev
     // time to run cron again
@@ -52,10 +52,14 @@ function finalist_copy_node_cron() {
  * JOSN feed imedetly after.
  */
 function _finalist_copy_node_controller() {
-  $nodes = node_load_multiple(array(), array('type' => 'traject'));
+  // load nodes
+
   foreach ($nodes as $node) {
-    dsm($node);
+    // dsm($node);
+    // set content type
     $node->type = 'traject_history';
+    // not inserting as new but moving the node to 'traject_history' content type
+    // $node->is_new = TRUE;
     node_save($node);
     break;
   }
@@ -64,21 +68,31 @@ function _finalist_copy_node_controller() {
 
 /*
  * function select nodes
- * select nodes where date is between now and now() -1 hour
- * and the most recent ones distinct by traject
- * returns node objects
+ * select latest traject nodes per traject
+ * returns array with node nid's
  */
-// disabled and moved to controller, makes no sense to create a function
-// for one line of code.
-// function finalist_copy_node_select_nodes(){
-//   // select all traject nodes that are crawled using JSON feed.
-//   // select * from node where type = "traject"
+function finalist_copy_node_select_nodes(){
 
+  // select the latest traject nodes
+  $result = db_query('SELECT n.nid FROM {node} n
+    JOIN {field_data_field_location} l ON n.nid = l.entity_id
+    GROUP BY l.field_location_value
+    ORDER BY n.created ASC');
 
-//   return $nodes;
-// }
+  $nodes = $result->fetchAll();
 
-/*
+  // convert to simple array
+  foreach ($nodes as $node) {
+    $returnvalue[] = $node->nid;
+  }
+
+  return $returnvalue;
+}
+
+function finalist_copy_node_node_view($node, $view_mode, $langcode) {
+  finalist_copy_node_select_nodes();
+}
+ /*
  * function insert nodes
  * (node_save())
  */
