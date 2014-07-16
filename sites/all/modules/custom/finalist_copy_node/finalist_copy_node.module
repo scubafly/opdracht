@@ -13,16 +13,6 @@
  * Controller to initiate copy
  */
 function finalist_copy_node_cron() {
-
-  // get last cron run or set to now when non exiting
-
-}
-
-/*
- * putting this in a hook_node_view so I can just refresh the page with a node
- * and also dpm does not seam to work in a hook_cron
- */
-function finalist_copy_node_node_view($node, $view_mode, $langcode) {
   // TODO: cron interval to a variable that can be set in the admin interface
 
   // get last cron run for this else use last system cron time.
@@ -34,7 +24,7 @@ function finalist_copy_node_node_view($node, $view_mode, $langcode) {
   $one_hour_ago = (time() - 3600);
   dpm("one hour ago: " . $one_hour_ago);
 
-  if($last_cron >= $one_hour_ago) {
+  if($last_cron >= $one_hour_ago OR true == true) { // added true for dev
     // time to run cron again
 
     // give job to controller
@@ -43,13 +33,18 @@ function finalist_copy_node_node_view($node, $view_mode, $langcode) {
       variable_set('finalist_copy_node_cron', time());
     }
   }
-
 }
+
+/*
+ * putting this in a hook_node_view so I can just refresh the page with a node
+ * and also dpm does not seam to work in a hook_cron
+ */
+// function finalist_copy_node_node_view($node, $view_mode, $langcode) {
+
+
+// }
 /*
  * logic component
- * Make sure previews cron is around 1 hour ago else skip this run
- *
- * select node function
  *
  * insert new nodes as other content type
  *
@@ -59,7 +54,10 @@ function finalist_copy_node_node_view($node, $view_mode, $langcode) {
 function _finalist_copy_node_controller() {
   $nodes = node_load_multiple(array(), array('type' => 'traject'));
   foreach ($nodes as $node) {
-    dsm($node->nid);
+    dsm($node);
+    $node->type = 'traject_history';
+    node_save($node);
+    break;
   }
 }
 
