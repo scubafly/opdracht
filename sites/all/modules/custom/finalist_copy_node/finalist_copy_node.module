@@ -36,10 +36,12 @@ function finalist_copy_node_node_view($node, $view_mode, $langcode) {
 
   if($last_cron <= $one_hour_ago) {
     // time to run cron again
-    // update last cron run to now
-    variable_set('finalist_copy_node_cron', time());
 
-
+    // give job to controller
+    if(_finalist_copy_node_controller()) {
+      // on succes update last cron run to now
+      variable_set('finalist_copy_node_cron', time());
+    }
   }
 
 }
@@ -54,19 +56,29 @@ function finalist_copy_node_node_view($node, $view_mode, $langcode) {
  * delete nodes from JSON crawled feed except the most recent ones or call
  * JOSN feed imedetly after.
  */
+function _finalist_copy_node_controller() {
+  $nodes = node_load_multiple(array(), array('type' => 'traject'));
+  foreach ($nodes as $node) {
+    dsm($node->nid);
+  }
+}
+
 
 /*
  * function select nodes
  * select nodes where date is between now and now() -1 hour
  * and the most recent ones distinct by traject
- * returns node objects or array $nid
+ * returns node objects
  */
-function finalist_copy_node_select_nodes(){
-  // select all traject nodes that are crawled using JSON feed.
+// disabled and moved to controller, makes no sense to create a function
+// for one line of code.
+// function finalist_copy_node_select_nodes(){
+//   // select all traject nodes that are crawled using JSON feed.
+//   // select * from node where type = "traject"
 
-  // return $nids
-  return "";
-}
+
+//   return $nodes;
+// }
 
 /*
  * function insert nodes
