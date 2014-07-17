@@ -281,7 +281,7 @@ class FeedsImporter extends FeedsConfigurable {
       '#default_value' => $config['content_type'],
     );
     $cron_required =  ' ' . l(t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
-    $period = drupal_map_assoc(array(900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200), 'format_interval');
+    $period = drupal_map_assoc(array(300, 900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200), 'format_interval');
     foreach ($period as &$p) {
       $p = t('Every !p', array('!p' => $p));
     }

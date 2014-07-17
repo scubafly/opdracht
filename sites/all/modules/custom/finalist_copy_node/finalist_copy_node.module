@@ -30,6 +30,9 @@ function finalist_copy_node_cron() {
   }
 }
 
+function finalist_copy_node_node_view() {
+  // _finalist_copy_node_controller();
+}
 /**
  * logic component
  *
@@ -55,7 +58,22 @@ function _finalist_copy_node_controller() {
     $node->field_divv_timestamp[LANGUAGE_NONE][0]['value'] = $timestamp;
     unset($node->field_timestamp);
 
-    $node->field_divv_location_name[LANGUAGE_NONE][0]['value'] = $node->field_location[LANGUAGE_NONE][0]['value'];
+    // create or find taxonomy term
+    $term = taxonomy_get_term_by_name($node->field_location[LANGUAGE_NONE][0]['value'], 'location');
+    dsm($node->field_location[LANGUAGE_NONE][0]['value']);
+    if(!$term) {
+      $vocabulary = taxonomy_vocabulary_machine_name_load('location');
+      $term = new stdClass();
+      $term->name = $node->field_location[LANGUAGE_NONE][0]['value'];
+      $term->vid = $vocabulary->vid;
+      taxonomy_term_save($term);
+    }
+    // if is array, get first array item and make it an object
+    if(is_array($term)) {
+      $term = reset($term);
+    }
+    // insert taxonomy id
+    $node->field_divv_location_name[LANGUAGE_NONE][0]['tid'] = $term->tid;
     unset($node->field_location);
 
     $node->field_divv_velocity[LANGUAGE_NONE][0]['value'] = $node->field_velocity[LANGUAGE_NONE][0]['value'];
