@@ -26,7 +26,6 @@ function finalist_copy_node_cron() {
 
   if($last_cron >= $one_hour_ago OR true == true) { // added true for dev
     // time to run cron again
-
     // give job to controller
     if(_finalist_copy_node_controller()) {
       // on succes update last cron run to now
@@ -53,50 +52,96 @@ function finalist_copy_node_cron() {
  */
 function _finalist_copy_node_controller() {
   // load nodes
+  $nids = _finalist_copy_node_select_nodes('latest');
 
-  foreach ($nodes as $node) {
-    // dsm($node);
-    // set content type
+  // save nodes as new content type
+  foreach ($nids as $nid) {
+    $node = node_load($nid);
     $node->type = 'traject_history';
-    // not inserting as new but moving the node to 'traject_history' content type
-    // $node->is_new = TRUE;
+
+    // insert timestamp should be: YYYY-MM-DD HH:MM:SS
+    $timestamp = strptime($node->field_timestamp[LANGUAGE_NONE][0]['value'], "d-m-Y H:i:s");
+    // $timestamp = strftime("%Y-%m-%d H:i:s", mktime($timestamp));
+    $timestamp = date ("Y-m-d H:i:s", mktime($timestamp));
+    $node->field_divv_timestamp[LANGUAGE_NONE][0]['value'] = $timestamp;
+    unset($node->field_timestamp);
+
+    $node->field_divv_location_name[LANGUAGE_NONE][0]['value'] = $node->field_location[LANGUAGE_NONE][0]['value'];
+    unset($node->field_location);
+
+    $node->field_divv_velocity[LANGUAGE_NONE][0]['value'] = $node->field_velocity[LANGUAGE_NONE][0]['value'];
+    unset($node->field_velocity);
+    // inserting as new but moving the node to 'traject_history' content type
+    $node->is_new = TRUE;
+    unset($node->nid);
+    unset($node->vid);
+
     node_save($node);
-    break;
+
+
   }
+
+  $all_nids = _finalist_copy_node_select_nodes('all');
+
+  // remove $nids from $all_nids array to keep the latest in the db
+  $nids_of_nodes_to_delete = array_diff($all_nids, $nids);
+  // dsm($all_nids);
+  // dsm($nids);
+  // dsm($nids_of_nodes_to_delete);
+  _finalist_copy_node_delete_nodes($nids_of_nodes_to_delete);
+
+  return TRUE;
 }
 
+/**
+ * delets nodes with nid that is given in $nids array
+ * @param array $nids array of nids
+ */
+function _finalist_copy_node_delete_nodes($nids) {
+  // select all nodes from db
+  foreach($nids as $nid) {
+    node_delete($nid);
+  }
+}
 
 /*
  * function select nodes
  * select latest traject nodes per traject
  * returns array with node nid's
  */
-function finalist_copy_node_select_nodes(){
+function _finalist_copy_node_select_nodes($all_or_latest, $type = 'traject'){
 
-  // select the latest traject nodes
-  $result = db_query('SELECT n.nid FROM {node} n
-    JOIN {field_data_field_location} l ON n.nid = l.entity_id
-    GROUP BY l.field_location_value
-    ORDER BY n.created ASC');
+  // select all node nids of $type
+  if($all_or_latest == 'all') {
+    $result = db_query('SELECT n.nid FROM {node} n
+      WHERE n.type = :type',
+      array( ':type' => $type ) );
+  }
+
+  // select latest node nids of $type
+  elseif ($all_or_latest == 'latest') {
+    $result = db_query('SELECT n.nid FROM {node} n
+      JOIN {field_data_field_location} l ON n.nid = l.entity_id
+      GROUP BY l.field_location_value
+      ORDER BY n.created ASC',
+      array( ':type' => $type ) );
+  }
 
   $nodes = $result->fetchAll();
 
   // convert to simple array
   foreach ($nodes as $node) {
-    $returnvalue[] = $node->nid;
+    $returnarray[] = $node->nid;
   }
 
-  return $returnvalue;
+  return $returnarray;
 }
 
-function finalist_copy_node_node_view($node, $view_mode, $langcode) {
-  finalist_copy_node_select_nodes();
-}
- /*
- * function insert nodes
- * (node_save())
- */
+// /**
+//  * temp for dev only function call to simulate cron and show output
+//  */
+// function finalist_copy_node_node_view($node, $view_mode, $langcode) {
 
-/*
- * function delete nodes older then one hour
- */
+// }
+
+
