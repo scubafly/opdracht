@@ -24,7 +24,7 @@ function finalist_copy_node_cron() {
   if($last_cron >= $one_hour_ago) {
     // time to run cron again
     // give job to controller
-    _finalist_copy_node_controller()
+    _finalist_copy_node_controller();
     // on succes update last cron variable to now
     variable_set('finalist_copy_node_cron', time());
   }
