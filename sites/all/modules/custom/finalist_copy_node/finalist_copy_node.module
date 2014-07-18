@@ -30,9 +30,6 @@ function finalist_copy_node_cron() {
   }
 }
 
-function finalist_copy_node_node_view() {
-  // _finalist_copy_node_controller();
-}
 /**
  * logic component
  *
